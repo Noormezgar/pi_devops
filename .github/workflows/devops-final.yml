@@ -1,0 +1,82 @@
+name: DevOps Final Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  backend-ci:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # business-service
+      - name: Test business-service
+        run: mvn -B test
+        working-directory: ./back/business-domain/microservices-project/business-service
+
+      # partner-performance-service
+      - name: Test partner-performance-service
+        run: mvn -B test
+        working-directory: ./back/business-domain/partner-performance-service
+
+      # partner-contract-service
+      - name: Test partner-contract-service
+        run: mvn -B test
+        working-directory: ./back/business-domain/partner-contract-service
+
+      # partner-billing-service
+      - name: Test partner-billing-service
+        run: mvn -B test
+        working-directory: ./back/business-domain/partner-billing-service
+
+      # partner-intelligence-service
+      - name: Test partner-intelligence-service
+        run: mvn -B test
+        working-directory: ./back/business-domain/partner-intelligence-service
+
+      # voucher-fraud-service
+      - name: Test voucher-fraud-service
+        run: mvn -B test
+        working-directory: ./back/business-domain/voucher-fraud-service
+
+  frontend-ci:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './front/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./front
+
+      - name: Run Angular Tests
+        run: npx ng test --watch=false --browsers=ChromeHeadless
+        working-directory: ./front
+
+      - name: Build Angular Application
+        run: npx ng build
+        working-directory: ./front

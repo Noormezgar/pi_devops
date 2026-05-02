@@ -1,0 +1,46 @@
+server:
+  port: 8093
+
+spring:
+  application:
+    name: partner-intelligence-service
+  datasource:
+    url: jdbc:h2:mem:partner_intelligence_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+ai:
+  provider: gemini
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-1.5-pro}
+    timeout-ms: 7000
+  policy:
+    english-only: true
+  features:
+    health-score: true
+    recommendations: true
+    anomaly-detection: true
+    forecasting: true
+    summaries: true

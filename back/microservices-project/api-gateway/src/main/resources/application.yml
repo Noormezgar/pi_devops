@@ -1,0 +1,59 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: partner-route
+          uri: lb://business-service
+          predicates:
+            - Path=/api/partners/**
+
+        - id: deal-route
+          uri: lb://business-service
+          predicates:
+            - Path=/api/deals/**
+
+        - id: pack-route
+          uri: lb://business-service
+          predicates:
+            - Path=/api/packs/**
+
+        - id: accesscode-route
+          uri: lb://business-service
+          predicates:
+            - Path=/api/access-codes/**
+
+        - id: partner-billing-route
+          uri: lb://partner-billing-service
+          predicates:
+            - Path=/api/partner-billing/**
+
+        - id: partner-contract-route
+          uri: lb://partner-contract-service
+          predicates:
+            - Path=/api/partner-contracts/**
+
+        - id: partner-performance-route
+          uri: lb://partner-performance-service
+          predicates:
+            - Path=/api/partner-performance/**
+
+        - id: voucher-fraud-route
+          uri: lb://voucher-fraud-service
+          predicates:
+            - Path=/api/voucher-fraud/**
+
+        - id: partner-intelligence-route
+          uri: lb://partner-intelligence-service
+          predicates:
+            - Path=/api/partner-intelligence/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

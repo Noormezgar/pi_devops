@@ -1,0 +1,11 @@
+node_modules/
+coverage/
+.scannerwork/
+*.log
+target/
+.vscode/
+.idea/
+.angular/
+dist/
+back.zip
+front.zip

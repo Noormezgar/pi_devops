@@ -1,0 +1,84 @@
+name: Forme CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  JAVA_VERSION: '17'
+  MAVEN_VERSION: '3.9.5'
+  BUSINESS_DOMAIN_MODULES: business-domain/partner-contract-service,business-domain/partner-performance-service,business-domain/partner-billing-service,business-domain/partner-intelligence-service,business-domain/voucher-fraud-service
+
+jobs:
+  # Backend Tests - business-domain services
+  backend-test-business-domain:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Test business-domain services
+        working-directory: back
+        run: mvn -B -pl ${{ env.BUSINESS_DOMAIN_MODULES }} test
+
+  # Backend Build - business-domain services
+  backend-build-business-domain:
+    runs-on: windows-latest
+    needs: backend-test-business-domain
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build business-domain services
+        working-directory: back
+        run: mvn -B -pl ${{ env.BUSINESS_DOMAIN_MODULES }} -DskipTests package
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: business-domain-artifacts
+          path: |
+            back/business-domain/partner-contract-service/target/*.jar
+            back/business-domain/partner-performance-service/target/*.jar
+            back/business-domain/partner-billing-service/target/*.jar
+            back/business-domain/partner-intelligence-service/target/*.jar
+            back/business-domain/voucher-fraud-service/target/*.jar
+
+  # Optional SonarQube Analysis
+  sonar-backend:
+    runs-on: windows-latest
+    needs: backend-build-business-domain
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: SonarQube Scan - business-domain services
+        working-directory: back
+        run: mvn -B -pl ${{ env.BUSINESS_DOMAIN_MODULES }} sonar:sonar -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
