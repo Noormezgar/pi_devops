@@ -1,26 +1,23 @@
 package tn.esprit.partnerperformance.controllers;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import tn.esprit.partnerperformance.dto.LeaderboardRow;
 import tn.esprit.partnerperformance.dto.PartnerKpi;
 import tn.esprit.partnerperformance.entities.PerformanceAlert;
 import tn.esprit.partnerperformance.services.PartnerPerformanceService;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PartnerPerformanceController.class)
 public class PartnerPerformanceControllerTest {
@@ -33,8 +30,8 @@ public class PartnerPerformanceControllerTest {
 
     @Test
     public void testGetPartnerKpis() throws Exception {
-        PartnerKpi kpi = new PartnerKpi(45.5, 1000, 455, 5000.0);
-        
+        PartnerKpi kpi = new PartnerKpi(45.5, 1000L, 455L, 5000.0);
+
         when(performanceService.getPartnerKpi(1L, "30d")).thenReturn(kpi);
 
         mockMvc.perform(get("/api/partner-performance/v1/partners/1/kpis")
@@ -50,7 +47,7 @@ public class PartnerPerformanceControllerTest {
     public void testGetLeaderboard() throws Exception {
         LeaderboardRow row1 = new LeaderboardRow(1, 11L, "Partner A", 100.0);
         LeaderboardRow row2 = new LeaderboardRow(2, 12L, "Partner B", 90.0);
-        
+
         when(performanceService.getLeaderboard("30d", "redemptionRate", 10))
                 .thenReturn(Arrays.asList(row1, row2));
 
@@ -68,10 +65,16 @@ public class PartnerPerformanceControllerTest {
     @Test
     public void testGetAlerts() throws Exception {
         PerformanceAlert alert = new PerformanceAlert(
-                1L, 1L, "LOW_REDEMPTION", "HIGH", 
-                "Redemption rate dropped", "OPEN", 
-                LocalDateTime.now(), null);
-        
+                1L,
+                1L,
+                "LOW_REDEMPTION",
+                "HIGH",
+                "Redemption rate dropped",
+                "OPEN",
+                LocalDateTime.now(),
+                null
+        );
+
         when(performanceService.getOpenAlerts()).thenReturn(Arrays.asList(alert));
 
         mockMvc.perform(get("/api/partner-performance/v1/alerts"))
@@ -85,10 +88,16 @@ public class PartnerPerformanceControllerTest {
     @Test
     public void testResolveAlert() throws Exception {
         PerformanceAlert alert = new PerformanceAlert(
-                1L, 1L, "LOW_REDEMPTION", "HIGH", 
-                "Redemption rate dropped", "RESOLVED", 
-                LocalDateTime.now(), LocalDateTime.now());
-        
+                1L,
+                1L,
+                "LOW_REDEMPTION",
+                "HIGH",
+                "Redemption rate dropped",
+                "RESOLVED",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
         when(performanceService.resolveAlert(1L)).thenReturn(alert);
 
         mockMvc.perform(post("/api/partner-performance/v1/alerts/1/resolve"))
