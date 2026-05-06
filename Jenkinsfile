@@ -14,19 +14,10 @@ pipeline {
             }
         }
 
-        stage('Build Maven') {
-            steps {
-                dir('back/business-domain/partner-contract-service') {
-                    sh 'chmod +x mvnw || true'
-                    sh './mvnw clean package -DskipTests || mvn clean package -DskipTests'
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 dir('back/business-domain/partner-contract-service') {
-                    sh 'docker build -t noormezgar/partner-contract-service:latest .'
+                    sh 'docker build -t $DOCKER_IMAGE:latest .'
                 }
             }
         }
@@ -34,14 +25,14 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'bb7b71c0-fcae-4356-aaea-dcc364177a01',
+                    credentialsId: 'dockerhub-creds',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
 
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
 
-                    sh 'docker push noormezgar/partner-contract-service:latest'
+                    sh 'docker push $DOCKER_IMAGE:latest'
                 }
             }
         }
