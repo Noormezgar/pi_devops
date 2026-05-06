@@ -29,11 +29,12 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-
-                    sh """
-                        echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
-                        docker push \$DOCKER_IMAGE:latest
-                    """
+                    sh '''
+                        set +x
+                        docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+                        docker push $DOCKER_IMAGE:latest
+                        docker logout
+                    '''
                 }
             }
         }
@@ -43,7 +44,6 @@ pipeline {
         success {
             echo 'Docker image pushed successfully!'
         }
-
         failure {
             echo 'Pipeline failed!'
         }
